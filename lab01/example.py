@@ -1,36 +1,8 @@
-from collections import OrderedDict
-from datetime import timedelta
-
-import zeep
+import zeep_fix
 from onvif import ONVIFCamera, ONVIFService
 from zeep import helpers
-import json
 
-
-def zeep_pythonvalue(self, xmlvalue):
-    return xmlvalue
-
-
-zeep.xsd.simple.AnySimpleType.pythonvalue = zeep_pythonvalue
-
-IP = "172.18.212.17"  # Camera IP address
-PORT = 80  # Port
-USER = "laba2102"  # Username
-PASS = "TMPpassword"  # Password
-
-
-def delete_rec(element):
-    if type(element) == OrderedDict:
-        for key, value in element.items():
-            if key in ['_value_1'] and type(element[key]) not in [OrderedDict]:
-                element[key] = str(element[key])
-            elif type(value) in [timedelta]:
-                element[key] = str(element[key])
-            else:
-                delete_rec(element[key])
-            if type(element[key]) in (tuple, list):
-                for i in element[key]:
-                    delete_rec(i)
+from credentials import *
 
 
 if __name__ == '__main__':
