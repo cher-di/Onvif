@@ -14,3 +14,10 @@
 ```shell script
 python lab02\example.py result.py
 ```
+
+## Соответствие лаб
+|Лаба|Папка|
+|---|---|
+|onvif-1|lab01|
+|onvif-1-2|lab02|
+|onvif-2|lab03|
