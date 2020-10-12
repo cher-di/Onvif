@@ -7,14 +7,39 @@ def zeep_pythonvalue(self, xmlvalue):
 
 zeep.xsd.simple.AnySimpleType.pythonvalue = zeep_pythonvalue
 
-from onvif import ONVIFCamera
+from onvif import ONVIFCamera, ONVIFService
 from zeep import helpers
-from urllib.request import urlopen
 
-IP = '172.18.212.12'
+import numpy as np
+import requests
+
+from wand.image import Image
+from requests.auth import HTTPBasicAuth
+
+IP = '172.18.212.17'
 PORT = 80
-USER = 'student2020'
-PASS = 'student2020'
+USER = 'admin'
+PASS = 'Supervisor'
+
+
+def make_snapshot_uri_request(media_service: ONVIFService, profile_token: str):
+    get_snapshot_uri = media_service.create_type('GetSnapshotUri')
+    get_snapshot_uri.ProfileToken = profile_token
+    return get_snapshot_uri
+
+
+def get_image_url(media_service: ONVIFService, snapshot_uri_request):
+    result = media_service.GetSnapshotUri(snapshot_uri_request)
+    return result['Uri']
+
+
+def get_image(url: str, user: str = None, password: str = None) -> Image:
+    if not user:
+        data = requests.get(url).content
+    else:
+        data = requests.get(url, auth=HTTPBasicAuth(user, password)).content
+    return Image(blob=data)
+
 
 if __name__ == '__main__':
     mycam = ONVIFCamera(host=IP,
@@ -33,11 +58,9 @@ if __name__ == '__main__':
     # Получаем токен
     profile_token = main_profile['token']
 
-    get_snapshot_uri = media.create_type('GetSnapshotUri')
-    get_snapshot_uri.ProfileToken = profile_token
+    snapshot_uri_request = make_snapshot_uri_request(media, profile_token)
+    url = get_image_url(media, snapshot_uri_request)
+    image = get_image(url, USER, PASS)
 
-    result = media.GetSnapshotUri(get_snapshot_uri)
-    url = result['Uri']
-    image = urlopen(url).read()
-    with open('image.jpg', 'wb') as file:
-        file.write(image)
+    array = np.array(image)
+    print(array)
